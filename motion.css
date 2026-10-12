@@ -1,0 +1,81 @@
+/* =====================================================================
+   MOTION LAYER — driven by motion.js (springs, scroll, cursor, split text)
+   ===================================================================== */
+
+/* ---------- Cinematic intro ---------- */
+.curtain { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; align-content: center; gap: 18px; background: var(--accent-strong); color: var(--accent-ink); border-radius: 0 0 50% 50% / 0 0 8vh 8vh; pointer-events: none; animation: curtain-up .95s cubic-bezier(.76, 0, .24, 1) 1s forwards; will-change: transform; }
+.curtain-mark { width: 64px; height: 64px; border-radius: 20px; background: var(--accent-ink); animation: mark-in .9s var(--ease) both, mark-out .5s ease-in .75s forwards; position: relative; }
+.curtain-mark::after { content: ""; position: absolute; inset: 14px; border-radius: 8px; background: var(--accent-strong); animation: spin 1.6s var(--ease) both; }
+.curtain-name { font: 500 1.1rem/1 var(--serif); letter-spacing: .02em; opacity: 0; animation: name-in .8s var(--ease) .25s both, mark-out .4s ease-in .75s forwards; }
+@keyframes curtain-up { to { transform: translateY(-104%); visibility: hidden; } }
+@keyframes mark-in { from { transform: scale(.3) rotate(-90deg); opacity: 0; } }
+@keyframes mark-out { to { transform: scale(.85); opacity: 0; } }
+@keyframes name-in { from { opacity: 0; transform: translateY(10px); } to { opacity: .9; } }
+
+/* ---------- Split-text headings ---------- */
+.split .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .1em .12em .2em; margin: -.1em -.12em -.2em; }
+.split .wi { display: inline-block; transform: translateY(108%) rotate(5deg); transform-origin: 0 100%; transition: transform 1.15s var(--ease); transition-delay: calc(var(--wi, 0) * 65ms); }
+.split.in .wi { transform: none; }
+.l { display: inline-block; }
+.accent-text { animation: warm 7s ease-in-out infinite; }
+@keyframes warm { 50% { color: color-mix(in srgb, var(--accent-strong) 55%, var(--accent)); } }
+.accent-text:hover .l { animation: wave .7s var(--ease) calc(var(--li) * 35ms); }
+@keyframes wave { 40% { transform: translateY(-.14em) rotate(-3deg); } }
+/* hold the hero until the curtain lifts */
+.js:not(.ready) .hero .split .wi, .js:not(.ready) .hero .split.in .wi { transform: translateY(108%) rotate(5deg); transition: none; }
+.js:not(.ready) .hero .reveal, .js:not(.ready) .hero .reveal.in { opacity: 0; translate: 0 28px; filter: blur(6px); transition: none; }
+
+/* ---------- Scroll progress + nav reactions ---------- */
+.progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 60; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); transform: scaleX(0); transform-origin: 0 50%; pointer-events: none; will-change: transform; }
+.nav { transition: transform .7s var(--ease), scale .6s var(--ease), box-shadow .5s var(--ease); }
+.nav-wrap.scrolled .nav { scale: .965; box-shadow: var(--shadow-lift), inset 0 1px 0 var(--glass-shine), inset 0 -1px 0 var(--glass-edge); }
+.nav-indicator { position: absolute; top: 0; left: 0; height: 100%; width: var(--w, 0); transform: translateX(var(--x, 0)); border-radius: 999px; background: var(--glass-strong); box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 -1px 0 var(--glass-edge), 0 2px 8px rgba(80, 50, 20, .12); opacity: 0; pointer-events: none; z-index: 0; transition: transform .65s cubic-bezier(.34, 1.3, .64, 1), width .65s cubic-bezier(.34, 1.3, .64, 1), opacity .35s; }
+.nav-indicator.on { opacity: 1; }
+@media (min-width: 761px) {
+  .nav-links a:hover, .nav-links a[aria-current="true"] { background: none; box-shadow: none; }
+}
+@media (max-width: 760px) { .nav-indicator { display: none; } }
+
+/* ---------- Liquid glass: moving reflections ---------- */
+.nav::before, .contact::before, .stats::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; background: linear-gradient(112deg, transparent 35%, rgba(255, 255, 255, .42) 48%, rgba(255, 220, 190, .22) 52%, transparent 65%) 0 0 / 260% 100% no-repeat; background-position: 130% 0; animation: sheen 11s cubic-bezier(.45, 0, .25, 1) infinite; mix-blend-mode: soft-light; }
+.contact::before { animation-duration: 14s; animation-delay: 2s; }
+.stats::before { animation-delay: 4s; }
+@keyframes sheen { 0%, 55% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
+.skill::before, .interest::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; background: linear-gradient(112deg, transparent 38%, rgba(255, 255, 255, .4) 50%, transparent 62%) 0 0 / 260% 100% no-repeat; background-position: 130% 0; transition: background-position 1s var(--ease); mix-blend-mode: soft-light; }
+.skill:hover::before, .interest:hover::before { background-position: -30% 0; }
+.ring::before { content: ""; position: absolute; inset: -1px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 55%, rgba(255, 255, 255, .9) 70%, color-mix(in srgb, var(--accent) 70%, transparent) 78%, transparent 90%); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)); animation: spin 14s linear infinite; }
+.btn-primary::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .45) 50%, transparent 70%); transform: translateX(-120%); transition: transform .9s var(--ease); }
+.btn-primary:hover::before { transform: translateX(120%); }
+
+/* ---------- Ambient: canvas particles ---------- */
+.particles { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* ---------- Buttons: ripple + magnetic ---------- */
+.ripple { position: absolute; border-radius: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; background: rgba(255, 255, 255, .5); transform: scale(0); pointer-events: none; animation: ripple .7s var(--ease) forwards; }
+.btn-glass .ripple { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+@keyframes ripple { to { transform: scale(14); opacity: 0; } }
+
+/* ---------- Animated icons ---------- */
+.social-btn:hover .ico, .card:hover .card-icon .ico, .interest:hover .ico, .contact-links a:hover .ico, .skill:hover .skill-head .ico { animation: icon-pop .65s var(--ease); }
+.icon-btn:hover .ico-moon, .icon-btn:hover .ico-sun { rotate: 18deg; }
+.scroll-cue .ico { animation: nudge 2.2s ease-in-out infinite; }
+@keyframes icon-pop { 35% { transform: scale(1.22) rotate(-8deg); } 70% { transform: scale(.96) rotate(3deg); } }
+@keyframes nudge { 50% { transform: translateY(3px); } }
+
+/* ---------- Section details ---------- */
+.kicker { display: flex; align-items: center; gap: 12px; }
+.kicker::before { content: ""; width: 36px; height: 1.5px; background: currentColor; transform: scaleX(0); transform-origin: 0 50%; transition: transform 1.1s var(--ease) .2s; }
+.kicker.in::before { transform: scaleX(1); }
+
+/* ---------- Dark mode: circular view transition ---------- */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+.theme-fade, .theme-fade *, .theme-fade *::before, .theme-fade *::after { transition: background-color .6s var(--ease), color .6s var(--ease), border-color .6s var(--ease) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .curtain, .particles, .progress { display: none; }
+  .accent-text, .nav::before, .contact::before, .stats::before, .ring::before { animation: none; }
+  .split .wi { transform: none; }
+  .kicker::before { transform: scaleX(1); }
+}
